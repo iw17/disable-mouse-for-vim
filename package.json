@@ -4,6 +4,7 @@
   "displayName": "disable-mouse-for-vim",
   "description": "What it says is what it does",
   "version": "0.0.1",
+  "repository": "https://github.com/iw17/disable-mouse-for-vim",
   "engines": {
     "vscode": "^1.92.0"
   },
