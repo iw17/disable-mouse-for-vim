@@ -1,5 +1,6 @@
 {
   "name": "disable-mouse-for-vim",
+  "publisher": "iw17",
   "displayName": "disable-mouse-for-vim",
   "description": "What it says is what it does",
   "version": "0.0.1",
