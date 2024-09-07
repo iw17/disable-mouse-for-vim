@@ -6,11 +6,13 @@ export class LastClick {
 
 	public time: number;
 	public kind: Kind | undefined;
+	public editor: vscode.TextEditor | undefined;
 	public selections: readonly vscode.Selection[];
 
 	public constructor (selections: readonly vscode.Selection[]) {
 		this.time = performance.now();
 		this.kind = undefined;
+		this.editor = undefined;
 		this.selections = selections;
 	}
 
@@ -19,8 +21,24 @@ export class LastClick {
 			return;
 		}
 		this.time = performance.now();
+		this.editor = editor;
 		this.selections = editor.selections;
 		console.log(`State initialized.`);
+	}
+
+	public switch(editor: vscode.TextEditor | undefined): void {
+		if (editor === undefined) {
+			console.log(`No active text editor.`);
+			return;
+		}
+		this.time = performance.now();
+		this.kind = undefined;
+		this.editor = editor;
+		this.selections = editor.selections;
+		console.log(`Active text editor switched.`);
+		for (const sel of this.selections) {
+			console.log(`Switched selection ${sel.start} ${sel.end}.`);
+		}
 	}
 	
 	public allows(event: vscode.TextEditorSelectionChangeEvent): boolean {
@@ -35,9 +53,9 @@ export class LastClick {
 	
 	public update(event: vscode.TextEditorSelectionChangeEvent): void {
 		this.time = performance.now();
-		if (event.kind === undefined) {
-			return;
-		}
+		//if (event.kind === undefined) {
+		//	return;
+		//}
 		this.kind = event.kind;
 		this.selections = event.textEditor.selections;
 		console.log(`State updated.`);
@@ -49,7 +67,7 @@ export class LastClick {
 	public reject(event: vscode.TextEditorSelectionChangeEvent): void {
 		this.time = performance.now();
 		this.kind = event.kind;
-		console.log(`State update rejected.`)
+		console.log(`State update rejected.`);
 		for (const sel of event.selections) {
 			console.log(`Rejected selection ${sel.start} ${sel.end}.`);
 		}
@@ -62,7 +80,7 @@ export class LastClick {
 		}
 		this.time = performance.now();
 		editor.selections = this.selections;
-		console.log('State restored.');
+		console.log(`State restored.`);
 		for (const sel of this.selections) {
 			console.log(`Restored selection ${sel.start} ${sel.end}.`);
 		}

@@ -11,28 +11,20 @@ export function activate(context: vscode.ExtensionContext): void {
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
 	console.log(`Hello! Extension 'disable-mouse-for-vim' activated.`);
-	vscode.window.onDidChangeTextEditorSelection(onClick);
-	last.init(vscode.window.activeTextEditor);
-
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	//const disposable = vscode.commands.registerCommand('disable-mouse-for-vim.helloWorld', () => {
-	//	// The code you place here will be executed every time your command is executed
-	//	// Display a message box to the user
-	//	console.log('Hello World from disable-mouse-for-vim!');
-	//});
-
-	//context.subscriptions.push(disposable);
+    vscode.window.onDidChangeTextEditorSelection(onClick);
+    vscode.window.onDidChangeActiveTextEditor(onSwitchTo);
+	// Initialize last using first state
+    last.switch(vscode.window.activeTextEditor);
 }
 
 // This method is called when your extension is deactivated
 export function deactivate(): void {
-	console.log(`Extension 'disable-mouse-for-vim' deactivated. Bye!`)
+	console.log(`Extension 'disable-mouse-for-vim' deactivated. Bye!`);
 }
 
 function onClick(event: vscode.TextEditorSelectionChangeEvent): void {
-	console.log(`Event received, kind = ${event.kind} following ${last.kind}.`);
+	console.log(`Selection change event received.`);
+    console.log(`Kind = ${event.kind} following ${last.kind}.`);
 	// Do nothing if not using Vim extension
 	const vimExts: readonly (vscode.Extension<any> | undefined)[] = [
 		'vscodevim.Vim',
@@ -43,12 +35,22 @@ function onClick(event: vscode.TextEditorSelectionChangeEvent): void {
 		console.log(`No Vim extension found.`)
 		return;
 	}
+    // Do nothing if a new text editor is launched
+    if (event.textEditor !== last.editor) {
+        console.log(`Different active text editor.`);
+        return;
+    }
 	if (last.allows(event)) {
-		console.log(`Event allowed.`);
+		console.log(`Selection change event allowed.`);
 		last.update(event);
 	} else {
-		console.log(`Event blocked.`);
+		console.log(`Selection change event blocked.`);
 		last.reject(event);
 		last.restore(vscode.window.activeTextEditor);
 	}
+}
+
+function onSwitchTo(editor: vscode.TextEditor | undefined): void {
+    console.log(`Switch event received.`);
+    last.switch(editor);
 }
